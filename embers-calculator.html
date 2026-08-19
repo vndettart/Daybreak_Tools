@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embers Earning Calculator</title>
+<style>
+  :root{
+    --bg-0:#1a1210;
+    --bg-1:#241713;
+    --bg-2:#2e1c16;
+    --card:#33201a;
+    --card-border:#4a2c20;
+    --ember-1:#ff8a4c;
+    --ember-2:#ff5f3d;
+    --ember-3:#ffb35c;
+    --text-hi:#fbe9df;
+    --text-mid:#d8b7a6;
+    --text-lo:#a3806f;
+    --good:#8fd19e;
+    --warn:#f2c94c;
+    --focus:#ffb35c;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #3a2116 0%, transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, #2a1810 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    color:var(--text-hi);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    min-height:100vh;
+    padding-bottom:80px;
+  }
+  header{
+    padding:32px 20px 18px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:2rem;
+    letter-spacing:0.5px;
+    background:linear-gradient(90deg, var(--ember-3), var(--ember-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{
+    margin:0;
+    color:var(--text-mid);
+    font-size:0.95rem;
+  }
+
+  .wrap{
+    max-width:900px;
+    margin:0 auto;
+    padding:0 16px;
+  }
+
+  .total-bar{
+    position:sticky;
+    top:0;
+    z-index:20;
+    backdrop-filter:blur(8px);
+    background:rgba(26,18,16,0.88);
+    border-bottom:1px solid var(--card-border);
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .total-bar .chip{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    background:linear-gradient(135deg, #3a2118, #2a1712);
+    border:1px solid var(--card-border);
+    padding:8px 16px;
+    border-radius:999px;
+  }
+  .total-bar .chip .label{
+    font-size:0.78rem;
+    color:var(--text-lo);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .total-bar .chip .val{
+    font-size:1.3rem;
+    font-weight:700;
+    color:var(--ember-3);
+  }
+  .total-bar .chip.grand{
+    border-color:var(--ember-2);
+    box-shadow:0 0 0 1px rgba(255,95,61,0.25), 0 4px 18px rgba(255,95,61,0.15);
+  }
+  .total-bar .chip.grand .val{
+    font-size:1.55rem;
+    color:var(--ember-1);
+  }
+
+  section.card{
+    background:linear-gradient(180deg, var(--card), #2a1912);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    margin:20px 0;
+    overflow:hidden;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    cursor:pointer;
+    user-select:none;
+    gap:12px;
+  }
+  .card-head:hover{ background:rgba(255,255,255,0.02); }
+  .card-head h2{
+    margin:0;
+    font-size:1.08rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .card-head .icon{
+    font-size:1.15rem;
+  }
+  .card-head .subtotal{
+    font-weight:700;
+    color:var(--ember-3);
+    font-size:1rem;
+    white-space:nowrap;
+  }
+  .card-head .chevron{
+    color:var(--text-lo);
+    transition:transform 0.2s ease;
+    font-size:0.85rem;
+  }
+  .card.collapsed .chevron{ transform:rotate(-90deg); }
+  .card-body{
+    padding:0 20px 20px;
+    border-top:1px solid var(--card-border);
+    padding-top:16px;
+  }
+  .card.collapsed .card-body{ display:none; }
+
+  .field-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:flex-end;
+    margin-bottom:14px;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1 1 200px;
+  }
+  .field label{
+    font-size:0.82rem;
+    color:var(--text-mid);
+  }
+  input[type=number], input[type=text], select{
+    background:#1e130f;
+    border:1px solid var(--card-border);
+    color:var(--text-hi);
+    padding:9px 10px;
+    border-radius:8px;
+    font-size:0.95rem;
+    outline:none;
+  }
+  input[type=number]:focus, select:focus, input[type=text]:focus{
+    border-color:var(--focus);
+    box-shadow:0 0 0 3px rgba(255,179,92,0.15);
+  }
+  .hint{
+    font-size:0.78rem;
+    color:var(--text-lo);
+    margin-top:-6px;
+    margin-bottom:10px;
+  }
+  .note{
+    font-size:0.8rem;
+    color:var(--text-lo);
+    background:rgba(255,255,255,0.03);
+    border:1px dashed var(--card-border);
+    border-radius:8px;
+    padding:8px 10px;
+    margin:10px 0;
+  }
+  .warn-msg{
+    font-size:0.82rem;
+    color:var(--warn);
+    background:rgba(242,201,76,0.08);
+    border:1px solid rgba(242,201,76,0.3);
+    border-radius:8px;
+    padding:8px 10px;
+    margin:10px 0;
+    display:none;
+  }
+  .warn-msg.show{ display:block; }
+
+  .checks{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 20px;
+    margin-bottom:12px;
+  }
+  .check-item{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:0.88rem;
+    color:var(--text-mid);
+  }
+  .check-item input{ accent-color: var(--ember-2); width:16px; height:16px; }
+
+  .stepper{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .stepper button{
+    width:28px; height:28px;
+    border-radius:6px;
+    border:1px solid var(--card-border);
+    background:#241712;
+    color:var(--text-hi);
+    cursor:pointer;
+    font-size:1rem;
+    line-height:1;
+  }
+  .stepper button:hover{ background:#3a2117; border-color:var(--ember-2); }
+  .stepper span{ min-width:20px; text-align:center; font-weight:600; }
+
+  .line-total{
+    text-align:right;
+    font-size:0.85rem;
+    color:var(--text-mid);
+    margin-top:6px;
+  }
+  .line-total b{ color:var(--ember-3); }
+
+  /* Artwork specific */
+  .piece{
+    background:rgba(0,0,0,0.15);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:16px;
+  }
+  .piece-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .piece-head .piece-title{
+    font-weight:700;
+    color:var(--ember-3);
+    font-size:0.95rem;
+  }
+  .piece-head .piece-sub{
+    font-size:0.85rem;
+    color:var(--text-mid);
+  }
+  .char-card{
+    background:#1e130f;
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:10px;
+  }
+  .char-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .char-head input[type=text]{
+    background:transparent;
+    border:none;
+    border-bottom:1px dashed var(--card-border);
+    color:var(--text-hi);
+    font-weight:600;
+    font-size:0.92rem;
+    padding:2px 2px;
+    width:160px;
+  }
+  .char-head input[type=text]:focus{ border-bottom-color:var(--focus); }
+  .radio-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:10px;
+  }
+  .radio-group .rg-title{
+    font-size:0.78rem;
+    color:var(--text-lo);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:2px;
+  }
+  .radio-options{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 14px;
+  }
+  .radio-options label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.85rem;
+    color:var(--text-mid);
+    cursor:pointer;
+  }
+  .radio-options input{ accent-color:var(--ember-2); }
+
+  button.btn{
+    background:linear-gradient(135deg, var(--ember-2), var(--ember-1));
+    color:#1a0f0a;
+    border:none;
+    font-weight:700;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:0.85rem;
+  }
+  button.btn:hover{ filter:brightness(1.08); }
+  button.btn.secondary{
+    background:transparent;
+    border:1px solid var(--card-border);
+    color:var(--text-mid);
+  }
+  button.btn.secondary:hover{ border-color:var(--ember-2); color:var(--text-hi); }
+  button.btn.danger{
+    background:transparent;
+    border:1px solid rgba(255,95,61,0.4);
+    color:#ff9b82;
+    padding:5px 10px;
+    font-size:0.78rem;
+  }
+  button.btn.danger:hover{ background:rgba(255,95,61,0.1); }
+
+  .char-subtotal{
+    text-align:right;
+    font-size:0.82rem;
+    color:var(--text-mid);
+  }
+  .char-subtotal b{ color:var(--ember-3); }
+
+  .add-row{
+    display:flex;
+    gap:10px;
+    margin-top:6px;
+  }
+
+  footer{
+    max-width:900px;
+    margin:30px auto 0;
+    padding:0 16px;
+    text-align:center;
+    color:var(--text-lo);
+    font-size:0.78rem;
+    line-height:1.6;
+  }
+
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-thumb{ background:#4a2c20; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔥 Embers Earning Calculator</h1>
+  <p>Estimate embers from roleplay, literature, artwork, tasks, and bonuses — staff still has final say on artwork value.</p>
+</header>
+
+<div class="total-bar">
+  <div class="chip"><span class="label">Roleplay</span><span class="val" id="tRoleplay">0</span></div>
+  <div class="chip"><span class="label">Literature</span><span class="val" id="tLiterature">0</span></div>
+  <div class="chip"><span class="label">Artwork</span><span class="val" id="tArtwork">0</span></div>
+  <div class="chip"><span class="label">Boost/Referral</span><span class="val" id="tMisc">0</span></div>
+  <div class="chip grand"><span class="label">Total Embers</span><span class="val" id="tGrand">0</span></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ROLEPLAY -->
+  <section class="card" id="card-rp">
+    <div class="card-head" data-toggle="card-rp">
+      <h2><span class="icon">📜</span> Roleplay</h2>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="subtotal">= <span id="rpSubtotal">0</span> embers</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label for="rpWords">Words you personally wrote</label>
+          <input type="number" id="rpWords" min="0" value="0">
+        </div>
+        <div class="field">
+          <label for="rpDropped">Roleplay status</label>
+          <select id="rpDropped">
+            <option value="completed">Completed normally</option>
+            <option value="dropped">Dropped (needs 400+ words to qualify)</option>
+          </select>
+        </div>
+      </div>
+      <div class="hint">1 ember per 10 words, rounded to the nearest whole number. Only count your own words — no headers or quoted text. Completed roleplays need 100+ words; dropped roleplays need 400+ words from you.</div>
+      <div class="warn-msg" id="rpWarn"></div>
+
+      <div class="note">Bonuses (mention these when submitting your claim!)</div>
+      <div class="checks">
+        <label class="check-item"><input type="checkbox" id="rpFirstRp"> First roleplay ever completed in the group (+50)</label>
+        <label class="check-item"><input type="checkbox" id="rpNewMember"> Completed with a new member, first character approved ≤30 days before RP start (+50, once per new member)</label>
+        <label class="check-item"><input type="checkbox" id="rpQuest"> Completed a quest (+20)</label>
+      </div>
+
+      <div class="note">Task rewards earned in this roleplay (via the rolling system)</div>
+      <div class="field-row" style="align-items:center;">
+        <div class="field" style="flex:1 1 160px;">
+          <label>Prey caught (5 each, capped at 4)</label>
+          <div class="stepper">
+            <button type="button" data-step="rpPrey" data-dir="-1">−</button>
+            <span id="rpPreyVal">0</span>
+            <button type="button" data-step="rpPrey" data-dir="1">+</button>
+          </div>
+        </div>
+        <div class="field" style="flex:1 1 160px;">
+          <label>Herbs collected (5 each, capped at 4)</label>
+          <div class="stepper">
+            <button type="button" data-step="rpHerb" data-dir="-1">−</button>
+            <span id="rpHerbVal">0</span>
+            <button type="button" data-step="rpHerb" data-dir="1">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="checks">
+        <label class="check-item"><input type="checkbox" id="rpDefend"> Defended the clan (+10)</label>
+        <label class="check-item"><input type="checkbox" id="rpTrain"> Trained an apprentice (+10)</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- LITERATURE -->
+  <section class="card" id="card-lit">
+    <div class="card-head" data-toggle="card-lit">
+      <h2><span class="icon">📖</span> Literature</h2>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="subtotal">= <span id="litSubtotal">0</span> embers</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label for="litWords">Words written</label>
+          <input type="number" id="litWords" min="0" value="0">
+        </div>
+      </div>
+      <div class="hint">1 ember per 20 words, rounded to the nearest whole number. Must be canon and focused on an in-group character.</div>
+    </div>
+  </section>
+
+  <!-- ARTWORK -->
+  <section class="card" id="card-art">
+    <div class="card-head" data-toggle="card-art">
+      <h2><span class="icon">🎨</span> Artwork</h2>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="subtotal">= <span id="artSubtotal">0</span> embers</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="note">Must be a clean, colored sketch or better showing clear effort — no colored bases or traced memes. Characters must be in-group. Only submit up to 3 pieces at a time; wait for staff to pay out before submitting more. Final worth is always staff's call.</div>
+      <div class="warn-msg" id="artWarn"></div>
+
+      <div id="piecesContainer"></div>
+
+      <div class="add-row">
+        <button type="button" class="btn" id="addPieceBtn">+ Add artwork piece</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOST / REFERRAL -->
+  <section class="card" id="card-misc">
+    <div class="card-head" data-toggle="card-misc">
+      <h2><span class="icon">🚀</span> Boosting &amp; Referral</h2>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="subtotal">= <span id="miscSubtotal">0</span> embers</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field-row" style="align-items:center;">
+        <div class="field" style="flex:1 1 220px;">
+          <label>Server boosts claimed (100 each, max 3 — include a screenshot)</label>
+          <div class="stepper">
+            <button type="button" data-step="boostCount" data-dir="-1">−</button>
+            <span id="boostCountVal">0</span>
+            <button type="button" data-step="boostCount" data-dir="1">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="checks">
+        <label class="check-item"><input type="checkbox" id="referralClaim"> Advertised the group (+100, once every 3 months)</label>
+      </div>
+      <div class="field-row" style="align-items:center;">
+        <div class="field" style="flex:1 1 260px;">
+          <label>Referred members who completed their first RP (100 each)</label>
+          <div class="stepper">
+            <button type="button" data-step="referralJoins" data-dir="-1">−</button>
+            <span id="referralJoinsVal">0</span>
+            <button type="button" data-step="referralJoins" data-dir="1">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Values follow the group's Embers shop guidelines as of Aug 2026. Staff determines final artwork worth based on effort shown — this calculator gives you a starting estimate only. Rules subject to change; when in doubt, make a ticket.
+</footer>
+
+<template id="pieceTemplate">
+  <div class="piece">
+    <div class="piece-head">
+      <span class="piece-title">Piece <span class="piece-num"></span></span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="piece-sub">= <span class="pieceSubtotal">0</span> embers</span>
+        <button type="button" class="btn danger removePieceBtn">Remove</button>
+      </div>
+    </div>
+    <div class="charsContainer"></div>
+    <div class="add-row">
+      <button type="button" class="btn secondary addCharBtn">+ Add character to this piece</button>
+    </div>
+  </div>
+</template>
+
+<template id="charTemplate">
+  <div class="char-card">
+    <div class="char-head">
+      <input type="text" class="charName" placeholder="Character name" value="Character">
+      <button type="button" class="btn danger removeCharBtn">Remove</button>
+    </div>
+
+    <div class="radio-group bodyTypeGroup">
+      <div class="rg-title">Base type</div>
+      <div class="radio-options">
+        <label><input type="radio" name="body" value="0" checked> None</label>
+        <label><input type="radio" name="body" value="10"> Headshot (10)</label>
+        <label><input type="radio" name="body" value="20"> Bust (20)</label>
+        <label><input type="radio" name="body" value="30"> Half-body (30)</label>
+        <label><input type="radio" name="body" value="40"> Fullbody (40)</label>
+        <label><input type="radio" name="body" value="5"> Chibi Bust (5)</label>
+        <label><input type="radio" name="body" value="10chibi"> Chibi Half-body (10)</label>
+        <label><input type="radio" name="body" value="15"> Chibi Fullbody (15)</label>
+        <label><input type="radio" name="body" value="10px"> Small Pixel 100x100 (10)</label>
+        <label><input type="radio" name="body" value="15px"> Medium Pixel 200x200 (15)</label>
+        <label><input type="radio" name="body" value="20px"> Large Pixel 300x300+ (20)</label>
+      </div>
+    </div>
+
+    <div class="radio-group">
+      <div class="rg-title">Coloring</div>
+      <div class="radio-options">
+        <label><input type="radio" name="color" value="0" checked> None</label>
+        <label><input type="radio" name="color" value="5"> Simple, 1–2 colors (+5)</label>
+        <label><input type="radio" name="color" value="10s"> Simple, 3+ colors (+10)</label>
+        <label><input type="radio" name="color" value="15"> Complex, 3+ colors (+15)</label>
+      </div>
+    </div>
+
+    <div class="radio-group">
+      <div class="rg-title">Shading</div>
+      <div class="radio-options">
+        <label><input type="radio" name="shade" value="0" checked> None</label>
+        <label><input type="radio" name="shade" value="5"> Minimal (+5)</label>
+        <label><input type="radio" name="shade" value="10"> Simple (+10)</label>
+        <label><input type="radio" name="shade" value="15"> Complex (+15)</label>
+      </div>
+    </div>
+
+    <div class="radio-group">
+      <div class="rg-title">Background</div>
+      <div class="radio-options">
+        <label><input type="radio" name="bg" value="0" checked> None</label>
+        <label><input type="radio" name="bg" value="15"> Simple scenery (+15)</label>
+        <label><input type="radio" name="bg" value="25"> Detailed scenery (+25)</label>
+      </div>
+    </div>
+
+    <div class="radio-group">
+      <div class="rg-title">Extras (add-ons, pick any)</div>
+      <div class="checks extrasChecks">
+        <label class="check-item"><input type="checkbox" class="extraPreGroup" value="15"> Illustration of pre-group history (+15)</label>
+        <label class="check-item"><input type="checkbox" class="extraInServer" value="30"> Illustration of an in-server RP (+30)</label>
+        <label class="check-item"><input type="checkbox" class="extraMeme" value="30"> Completion of a meme (+30)</label>
+      </div>
+    </div>
+
+    <label class="check-item" style="margin-bottom:8px;">
+      <input type="checkbox" class="halfValueToggle"> Colored sketch or symmetrical tool used (worth 50% of listed value)
+    </label>
+
+    <div class="char-subtotal">= <b class="charSubtotal">0</b> embers</div>
+  </div>
+</template>
+
+<script>
+(function(){
+  const bodyValues = {
+    "0":0, "10":10, "20":20, "30":30, "40":40,
+    "5":5, "10chibi":10, "15":15,
+    "10px":10, "15px":15, "20px":20
+  };
+  const colorValues = { "0":0, "5":5, "10s":10, "15":15 };
+
+  let pieceCount = 0;
+
+  const piecesContainer = document.getElementById('piecesContainer');
+  const pieceTemplate = document.getElementById('pieceTemplate');
+  const charTemplate = document.getElementById('charTemplate');
+
+  function numVal(id){ return parseFloat(document.getElementById(id).value) || 0; }
+
+  function addPiece(){
+    pieceCount++;
+    const frag = pieceTemplate.content.cloneNode(true);
+    const pieceEl = frag.querySelector('.piece');
+    pieceEl.dataset.id = pieceCount;
+    frag.querySelector('.piece-num').textContent = pieceCount;
+
+    frag.querySelector('.removePieceBtn').addEventListener('click', function(){
+      pieceEl.remove();
+      renumberPieces();
+      recalcAll();
+    });
+    frag.querySelector('.addCharBtn').addEventListener('click', function(){
+      addChar(pieceEl.querySelector('.charsContainer'));
+      recalcAll();
+    });
+
+    piecesContainer.appendChild(frag);
+    const mountedPiece = piecesContainer.lastElementChild;
+    addChar(mountedPiece.querySelector('.charsContainer'));
+    recalcAll();
+  }
+
+  function renumberPieces(){
+    const pieces = piecesContainer.querySelectorAll('.piece');
+    pieces.forEach((p, i) => {
+      p.querySelector('.piece-num').textContent = i + 1;
+    });
+    pieceCount = pieces.length;
+  }
+
+  function addChar(container){
+    const frag = charTemplate.content.cloneNode(true);
+    const charEl = frag.querySelector('.char-card');
+
+    // scope radio group names uniquely so multiple char-cards don't share selection state visually (not required functionally since not same <form>, but keep unique for clarity/accessibility)
+    const uid = 'c' + Math.random().toString(36).slice(2,9);
+    charEl.querySelectorAll('input[type=radio]').forEach(r => {
+      r.name = r.name + '-' + uid;
+      r.addEventListener('change', recalcAll);
+    });
+    charEl.querySelectorAll('input[type=checkbox]').forEach(c => {
+      c.addEventListener('change', recalcAll);
+    });
+    charEl.querySelector('.charName').addEventListener('input', recalcAll);
+
+    charEl.querySelector('.removeCharBtn').addEventListener('click', function(){
+      charEl.remove();
+      recalcAll();
+    });
+
+    container.appendChild(frag);
+  }
+
+  function charSubtotal(charEl){
+    let total = 0;
+    const bodyRadio = charEl.querySelector('input[name^="body-"]:checked');
+    if(bodyRadio) total += bodyValues[bodyRadio.value] || 0;
+
+    const colorRadio = charEl.querySelector('input[name^="color-"]:checked');
+    if(colorRadio) total += colorValues[colorRadio.value] || 0;
+
+    const shadeRadio = charEl.querySelector('input[name^="shade-"]:checked');
+    if(shadeRadio) total += parseFloat(shadeRadio.value) || 0;
+
+    const bgRadio = charEl.querySelector('input[name^="bg-"]:checked');
+    if(bgRadio) total += parseFloat(bgRadio.value) || 0;
+
+    charEl.querySelectorAll('.extrasChecks input[type=checkbox]:checked').forEach(cb => {
+      total += parseFloat(cb.value) || 0;
+    });
+
+    const halfToggle = charEl.querySelector('.halfValueToggle');
+    if(halfToggle && halfToggle.checked){
+      total = Math.round(total * 0.5);
+    }
+
+    charEl.querySelector('.charSubtotal').textContent = total;
+    return total;
+  }
+
+  function recalcAll(){
+    // Roleplay
+    let rpWords = numVal('rpWords');
+    let rpMode = document.getElementById('rpDropped').value;
+    let rpWarn = document.getElementById('rpWarn');
+    let rpBase = 0;
+    let rpQualifies = true;
+    if(rpMode === 'dropped'){
+      if(rpWords < 400){ rpQualifies = false; }
+    } else {
+      if(rpWords < 100){ rpQualifies = false; }
+    }
+    if(!rpQualifies){
+      rpWarn.classList.add('show');
+      rpWarn.textContent = rpMode === 'dropped'
+        ? 'Dropped roleplays need at least 400 of your own words to qualify for currency — this claim would earn 0 base embers.'
+        : 'Posts need at least 100 words to qualify — this claim would earn 0 base embers.';
+    } else {
+      rpWarn.classList.remove('show');
+    }
+    if(rpQualifies){
+      rpBase = Math.round(rpWords / 10);
+    }
+    let rpBonus = 0;
+    if(document.getElementById('rpFirstRp').checked) rpBonus += 50;
+    if(document.getElementById('rpNewMember').checked) rpBonus += 50;
+    if(document.getElementById('rpQuest').checked) rpBonus += 20;
+
+    const rpPreyCount = parseInt(document.getElementById('rpPreyVal').textContent) || 0;
+    const rpHerbCount = parseInt(document.getElementById('rpHerbVal').textContent) || 0;
+    let rpTasks = rpPreyCount * 5 + rpHerbCount * 5;
+    if(document.getElementById('rpDefend').checked) rpTasks += 10;
+    if(document.getElementById('rpTrain').checked) rpTasks += 10;
+
+    const rpTotal = rpBase + rpBonus + rpTasks;
+    document.getElementById('rpSubtotal').textContent = rpTotal;
+    document.getElementById('tRoleplay').textContent = rpTotal;
+
+    // Literature
+    let litWords = numVal('litWords');
+    let litTotal = Math.round(litWords / 20);
+    document.getElementById('litSubtotal').textContent = litTotal;
+    document.getElementById('tLiterature').textContent = litTotal;
+
+    // Artwork
+    let artTotal = 0;
+    const pieces = piecesContainer.querySelectorAll('.piece');
+    pieces.forEach(p => {
+      let pieceTotal = 0;
+      p.querySelectorAll('.char-card').forEach(c => {
+        pieceTotal += charSubtotal(c);
+      });
+      p.querySelector('.pieceSubtotal').textContent = pieceTotal;
+      artTotal += pieceTotal;
+    });
+    document.getElementById('artSubtotal').textContent = artTotal;
+    document.getElementById('tArtwork').textContent = artTotal;
+
+    const artWarn = document.getElementById('artWarn');
+    if(pieces.length > 3){
+      artWarn.classList.add('show');
+      artWarn.textContent = 'You can only submit 3 pieces at a time — wait until staff pays out your current claim before submitting more.';
+    } else {
+      artWarn.classList.remove('show');
+    }
+
+    // Boost / Referral
+    const boostCount = parseInt(document.getElementById('boostCountVal').textContent) || 0;
+    const referralJoins = parseInt(document.getElementById('referralJoinsVal').textContent) || 0;
+    let miscTotal = boostCount * 100 + referralJoins * 100;
+    if(document.getElementById('referralClaim').checked) miscTotal += 100;
+    document.getElementById('miscSubtotal').textContent = miscTotal;
+    document.getElementById('tMisc').textContent = miscTotal;
+
+    const grand = rpTotal + litTotal + artTotal + miscTotal;
+    document.getElementById('tGrand').textContent = grand;
+  }
+
+  // Steppers (generic, with per-id caps)
+  const stepperCaps = { rpPrey: 4, rpHerb: 4, boostCount: 3 };
+  document.querySelectorAll('.stepper button').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const key = btn.dataset.step;
+      const dir = parseInt(btn.dataset.dir);
+      const valEl = document.getElementById(key + 'Val');
+      let val = parseInt(valEl.textContent) || 0;
+      val += dir;
+      if(val < 0) val = 0;
+      const cap = stepperCaps[key];
+      if(cap !== undefined && val > cap) val = cap;
+      valEl.textContent = val;
+      recalcAll();
+    });
+  });
+
+  // Basic inputs
+  ['rpWords','litWords'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recalcAll);
+  });
+  document.getElementById('rpDropped').addEventListener('change', recalcAll);
+  ['rpFirstRp','rpNewMember','rpQuest','rpDefend','rpTrain','referralClaim'].forEach(id => {
+    document.getElementById(id).addEventListener('change', recalcAll);
+  });
+
+  // Collapsible cards
+  document.querySelectorAll('.card-head').forEach(head => {
+    head.addEventListener('click', function(){
+      const card = document.getElementById(head.dataset.toggle);
+      card.classList.toggle('collapsed');
+    });
+  });
+
+  document.getElementById('addPieceBtn').addEventListener('click', addPiece);
+
+  // start with one piece
+  addPiece();
+  recalcAll();
+})();
+</script>
+
+</body>
+</html>
