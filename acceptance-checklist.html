@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Acceptance Checklist</title>
+<style>
+  :root{
+    --bg-0:#1a1210;
+    --bg-1:#241713;
+    --bg-2:#2e1c16;
+    --card:#33201a;
+    --card-border:#4a2c20;
+    --ember-1:#ff8a4c;
+    --ember-2:#ff5f3d;
+    --ember-3:#ffb35c;
+    --text-hi:#fbe9df;
+    --text-mid:#d8b7a6;
+    --text-lo:#a3806f;
+    --good:#8fd19e;
+    --warn:#f2c94c;
+    --focus:#ffb35c;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #3a2116 0%, transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, #2a1810 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    color:var(--text-hi);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    min-height:100vh;
+    padding-bottom:80px;
+  }
+  header{
+    padding:32px 20px 18px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:2rem;
+    letter-spacing:0.5px;
+    background:linear-gradient(90deg, var(--ember-3), var(--ember-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{
+    margin:0;
+    color:var(--text-mid);
+    font-size:0.95rem;
+  }
+
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:0 16px;
+  }
+
+  .total-bar{
+    position:sticky;
+    top:0;
+    z-index:20;
+    backdrop-filter:blur(8px);
+    background:rgba(26,18,16,0.88);
+    border-bottom:1px solid var(--card-border);
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .total-bar .chip{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    background:linear-gradient(135deg, #3a2118, #2a1712);
+    border:1px solid var(--card-border);
+    padding:8px 18px;
+    border-radius:999px;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .total-bar .chip .label{
+    font-size:0.78rem;
+    color:var(--text-lo);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .total-bar .chip .val{
+    font-size:1.3rem;
+    font-weight:700;
+    color:var(--ember-3);
+  }
+  .total-bar .chip.done{
+    border-color:var(--good);
+    box-shadow:0 0 0 1px rgba(143,209,158,0.25), 0 4px 18px rgba(143,209,158,0.15);
+  }
+  .total-bar .chip.done .val{ color:var(--good); }
+  .total-bar button.resetBtn{
+    background:transparent;
+    border:1px solid var(--card-border);
+    color:var(--text-mid);
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:0.8rem;
+    cursor:pointer;
+  }
+  .total-bar button.resetBtn:hover{ border-color:var(--ember-2); color:var(--text-hi); }
+
+  section.card{
+    background:linear-gradient(180deg, var(--card), #2a1912);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    margin:20px 0;
+    overflow:hidden;
+    transition:border-color .2s ease;
+  }
+  section.card.step-complete{ border-color:rgba(143,209,158,0.4); }
+
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    gap:12px;
+  }
+  .card-head h2{
+    margin:0;
+    font-size:1.08rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .card-head .icon{ font-size:1.15rem; }
+  .card-head .status{
+    font-size:0.78rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--text-lo);
+    white-space:nowrap;
+  }
+  .card-head .status.done{ color:var(--good); }
+
+  .card-body{
+    padding:0 20px 20px;
+    border-top:1px solid var(--card-border);
+    padding-top:16px;
+  }
+
+  .task{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:9px 0;
+    font-size:0.95rem;
+    color:var(--text-hi);
+    cursor:pointer;
+    user-select:none;
+  }
+  .task input{
+    accent-color: var(--good);
+    width:18px; height:18px;
+    margin-top:1px;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .task span.label{ line-height:1.4; }
+  .task.checked span.label{
+    color:var(--text-lo);
+    text-decoration:line-through;
+    text-decoration-color:var(--card-border);
+  }
+
+  .task-note{
+    font-size:0.78rem;
+    color:var(--text-lo);
+    margin:-2px 0 4px 28px;
+  }
+
+  .condition{
+    margin:6px 0 4px 28px;
+    padding:10px 14px;
+    border:1px dashed var(--card-border);
+    border-radius:10px;
+    background:rgba(0,0,0,0.15);
+  }
+  .condition > .task{ padding:4px 0; font-size:0.88rem; }
+  .condition .rg-title{
+    font-size:0.72rem;
+    color:var(--text-lo);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:4px;
+  }
+  .condition input[type=checkbox]{ accent-color: var(--ember-2); }
+
+  .sub-tasks{
+    margin-top:6px;
+    padding-left:8px;
+    border-left:2px solid var(--card-border);
+    display:none;
+  }
+  .sub-tasks.show{ display:block; }
+  .sub-tasks .task{ font-size:0.9rem; padding:7px 0 7px 10px; }
+  .sub-tasks .task input{ accent-color: var(--good); }
+
+  footer{
+    max-width:720px;
+    margin:30px auto 0;
+    padding:0 16px;
+    text-align:center;
+    color:var(--text-lo);
+    font-size:0.78rem;
+    line-height:1.6;
+  }
+
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-thumb{ background:#4a2c20; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✅ Character Acceptance Checklist</h1>
+  <p>Run through this after approving a character — check off each step as you go.</p>
+</header>
+
+<div class="total-bar">
+  <div class="chip" id="progressChip">
+    <span class="label">Progress</span>
+    <span class="val"><span id="doneCount">0</span> / <span id="totalCount">0</span></span>
+  </div>
+  <button type="button" class="resetBtn" id="resetBtn">Reset</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ALLEGIANCES -->
+  <section class="card" id="card-allegiances">
+    <div class="card-head">
+      <h2><span class="icon">📜</span> Allegiances</h2>
+      <span class="status" id="status-allegiances">0 / 1</span>
+    </div>
+    <div class="card-body">
+      <label class="task" data-task>
+        <input type="checkbox" class="taskbox">
+        <span class="label">Add character to Allegiances</span>
+      </label>
+
+      <div class="condition">
+        <div class="rg-title">If applicable</div>
+        <label class="task" data-condition="apprentice">
+          <input type="checkbox" class="conditionbox">
+          <span class="label">Character is an apprentice</span>
+        </label>
+        <div class="sub-tasks" id="sub-apprentice">
+          <label class="task" data-task>
+            <input type="checkbox" class="taskbox">
+            <span class="label">Add to rank-up list</span>
+          </label>
+          <label class="task" data-task>
+            <input type="checkbox" class="taskbox">
+            <span class="label">Assign a mentor</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMBER LOGS -->
+  <section class="card" id="card-logs">
+    <div class="card-head">
+      <h2><span class="icon">🗂️</span> Member Logs</h2>
+      <span class="status" id="status-logs">0 / 1</span>
+    </div>
+    <div class="card-body">
+      <label class="task" data-task>
+        <input type="checkbox" class="taskbox">
+        <span class="label">Add to Member Logs</span>
+      </label>
+
+      <div class="condition">
+        <div class="rg-title">If applicable</div>
+        <label class="task" data-condition="newmember">
+          <input type="checkbox" class="conditionbox">
+          <span class="label">This is a new member (first character)</span>
+        </label>
+        <div class="sub-tasks" id="sub-newmember">
+          <label class="task" data-task>
+            <input type="checkbox" class="taskbox">
+            <span class="label">Add to dropdowns</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROLES -->
+  <section class="card" id="card-roles">
+    <div class="card-head">
+      <h2><span class="icon">🏷️</span> Roles</h2>
+      <span class="status" id="status-roles">0 / 1</span>
+    </div>
+    <div class="card-body">
+      <label class="task" data-task>
+        <input type="checkbox" class="taskbox">
+        <span class="label">Give roles</span>
+      </label>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Daybreak staff tool — check the boxes as you complete each step of accepting a character. Nothing here is saved; refresh or reopen to start a fresh checklist.
+</footer>
+
+<script>
+(function(){
+  // wire up the two conditional toggles
+  document.querySelectorAll('[data-condition]').forEach(function(toggle){
+    var key = toggle.dataset.condition;
+    var subTasks = document.getElementById('sub-' + key);
+    var checkbox = toggle.querySelector('.conditionbox');
+    checkbox.addEventListener('change', function(){
+      subTasks.classList.toggle('show', checkbox.checked);
+      // unchecking a sub-task list clears its boxes so they don't silently count
+      if(!checkbox.checked){
+        subTasks.querySelectorAll('.taskbox').forEach(function(cb){ cb.checked = false; });
+      }
+      recalc();
+    });
+  });
+
+  // strike-through styling on individual task rows
+  document.querySelectorAll('.taskbox').forEach(function(cb){
+    cb.addEventListener('change', function(){
+      cb.closest('.task').classList.toggle('checked', cb.checked);
+      recalc();
+    });
+  });
+
+  function cardTotals(cardEl){
+    var relevantBoxes = [];
+    cardEl.querySelectorAll('.taskbox').forEach(function(cb){
+      var hiddenParent = cb.closest('.sub-tasks');
+      if(hiddenParent && !hiddenParent.classList.contains('show')) return;
+      relevantBoxes.push(cb);
+    });
+    var done = relevantBoxes.filter(function(cb){ return cb.checked; }).length;
+    return { done: done, total: relevantBoxes.length };
+  }
+
+  function recalc(){
+    var grandDone = 0, grandTotal = 0;
+
+    [
+      ['card-allegiances','status-allegiances'],
+      ['card-logs','status-logs'],
+      ['card-roles','status-roles']
+    ].forEach(function(pair){
+      var cardEl = document.getElementById(pair[0]);
+      var t = cardTotals(cardEl);
+      grandDone += t.done;
+      grandTotal += t.total;
+
+      var statusEl = document.getElementById(pair[1]);
+      statusEl.textContent = t.done + ' / ' + t.total;
+      var complete = t.total > 0 && t.done === t.total;
+      statusEl.classList.toggle('done', complete);
+      cardEl.classList.toggle('step-complete', complete);
+    });
+
+    document.getElementById('doneCount').textContent = grandDone;
+    document.getElementById('totalCount').textContent = grandTotal;
+
+    var chip = document.getElementById('progressChip');
+    chip.classList.toggle('done', grandTotal > 0 && grandDone === grandTotal);
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    document.querySelectorAll('.taskbox, .conditionbox').forEach(function(cb){ cb.checked = false; });
+    document.querySelectorAll('.sub-tasks').forEach(function(el){ el.classList.remove('show'); });
+    document.querySelectorAll('.task.checked').forEach(function(el){ el.classList.remove('checked'); });
+    recalc();
+  });
+
+  recalc();
+})();
+</script>
+
+</body>
+</html>
