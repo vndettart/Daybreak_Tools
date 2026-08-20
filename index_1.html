@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daybreak Tools</title>
+<style>
+  :root{
+    --bg-0:#1a1210;
+    --bg-1:#241713;
+    --bg-2:#2e1c16;
+    --card:#33201a;
+    --card-border:#4a2c20;
+    --ember-1:#ff8a4c;
+    --ember-2:#ff5f3d;
+    --ember-3:#ffb35c;
+    --text-hi:#fbe9df;
+    --text-mid:#d8b7a6;
+    --text-lo:#a3806f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #3a2116 0%, transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, #2a1810 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    color:var(--text-hi);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding:48px 20px 20px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 8px;
+    font-size:2.2rem;
+    background:linear-gradient(90deg, var(--ember-3), var(--ember-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{
+    margin:0;
+    color:var(--text-mid);
+    font-size:0.95rem;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:20px 16px 60px;
+  }
+  .tool-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:16px;
+    margin-top:20px;
+  }
+  a.tool-card{
+    display:block;
+    background:linear-gradient(180deg, var(--card), #2a1912);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    padding:20px;
+    text-decoration:none;
+    color:var(--text-hi);
+    transition:border-color 0.15s ease, transform 0.15s ease;
+  }
+  a.tool-card:hover{
+    border-color:var(--ember-2);
+    transform:translateY(-2px);
+  }
+  a.tool-card .icon{
+    font-size:1.6rem;
+    margin-bottom:8px;
+    display:block;
+  }
+  a.tool-card .title{
+    font-weight:700;
+    font-size:1.05rem;
+    margin-bottom:4px;
+    display:block;
+  }
+  a.tool-card .desc{
+    font-size:0.85rem;
+    color:var(--text-mid);
+    display:block;
+    line-height:1.4;
+  }
+  .placeholder-card{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.02);
+    border:1px dashed var(--card-border);
+    border-radius:14px;
+    padding:20px;
+    color:var(--text-lo);
+    font-size:0.85rem;
+    text-align:center;
+  }
+  footer{
+    max-width:760px;
+    margin:20px auto 0;
+    padding:0 16px;
+    text-align:center;
+    color:var(--text-lo);
+    font-size:0.78rem;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔥 Daybreak Tools</h1>
+  <p>Calculators and helpers for the group. Pick a tool below.</p>
+</header>
+<div class="wrap">
+  <div class="tool-grid">
+    <a class="tool-card" href="embers-calculator.html">
+      <span class="icon"></span>
+      <span class="title">Embers Earning Calculator</span>
+      <span class="desc">Estimate embers from roleplay, literature, artwork, tasks, and bonuses.</span>
+    </a>
+    <a class="tool-card" href="acceptance-checklist.html">
+      <span class="icon"></span>
+      <span class="title">Character Acceptance Checklist</span>
+      <span class="desc">Staff checklist for the steps to run through after approving a character.</span>
+    </a>
+    <!--
+      To add a new tool:
+      1. Add its HTML file to this same repo (e.g. wordcount-calculator.html)
+      2. Copy an <a class="tool-card"> block above, change the href, icon, title, and desc
+      3. Paste it right below the last tool-card
+    -->
+    <div class="placeholder-card">More tools coming soon</div>
+  </div>
+</div>
+<footer>
+  Daybreak Tools &mdash; unofficial calculators, not official group records.
+</footer>
+</body>
+</html>
