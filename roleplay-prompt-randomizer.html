@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roleplay Prompt Randomizer</title>
+<style>
+  :root{
+    --bg-0:#1a1210;
+    --bg-1:#241713;
+    --bg-2:#2e1c16;
+    --card:#33201a;
+    --card-border:#4a2c20;
+    --ember-1:#ff8a4c;
+    --ember-2:#ff5f3d;
+    --ember-3:#ffb35c;
+    --text-hi:#fbe9df;
+    --text-mid:#d8b7a6;
+    --text-lo:#a3806f;
+    --good:#8fd19e;
+    --warn:#f2c94c;
+    --focus:#ffb35c;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #3a2116 0%, transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, #2a1810 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    color:var(--text-hi);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    min-height:100vh;
+    padding-bottom:80px;
+  }
+  header{
+    padding:32px 20px 18px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:2rem;
+    letter-spacing:0.5px;
+    background:linear-gradient(90deg, var(--ember-3), var(--ember-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{
+    margin:0;
+    color:var(--text-mid);
+    font-size:0.95rem;
+  }
+
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 16px;
+  }
+
+  section.card{
+    background:linear-gradient(180deg, var(--card), #2a1912);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    margin:20px 0;
+    overflow:hidden;
+  }
+  .card-head{
+    padding:16px 20px;
+  }
+  .card-head h2{
+    margin:0;
+    font-size:1.08rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .card-head .icon{ font-size:1.15rem; }
+  .card-body{
+    padding:0 20px 20px;
+    border-top:1px solid var(--card-border);
+    padding-top:16px;
+  }
+
+  .field-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:flex-end;
+    margin-bottom:14px;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1 1 200px;
+  }
+  .field label{
+    font-size:0.82rem;
+    color:var(--text-mid);
+  }
+  input[type=text], select{
+    background:#1e130f;
+    border:1px solid var(--card-border);
+    color:var(--text-hi);
+    padding:9px 10px;
+    border-radius:8px;
+    font-size:0.95rem;
+    outline:none;
+    width:100%;
+  }
+  input[type=text]:focus, select:focus{
+    border-color:var(--focus);
+    box-shadow:0 0 0 3px rgba(255,179,92,0.15);
+  }
+  .hint{
+    font-size:0.78rem;
+    color:var(--text-lo);
+    margin-top:-6px;
+    margin-bottom:10px;
+  }
+  .note{
+    font-size:0.8rem;
+    color:var(--text-lo);
+    background:rgba(255,255,255,0.03);
+    border:1px dashed var(--card-border);
+    border-radius:8px;
+    padding:8px 10px;
+    margin:10px 0;
+  }
+
+  .char-pair{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:6px;
+  }
+  .char-block{
+    flex:1 1 260px;
+    background:rgba(0,0,0,0.15);
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:12px;
+  }
+  .char-block .char-label{
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--text-lo);
+    margin-bottom:8px;
+  }
+
+  button.btn{
+    background:linear-gradient(135deg, var(--ember-2), var(--ember-1));
+    color:#1a0f0a;
+    border:none;
+    font-weight:700;
+    padding:10px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:0.9rem;
+  }
+  button.btn:hover{ filter:brightness(1.08); }
+  button.btn.secondary{
+    background:transparent;
+    border:1px solid var(--card-border);
+    color:var(--text-mid);
+  }
+  button.btn.secondary:hover{ border-color:var(--ember-2); color:var(--text-hi); }
+  button.btn.wide{ width:100%; }
+
+  .btn-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:6px;
+  }
+  .btn-row .btn{ flex:1 1 160px; }
+
+  .result{
+    display:none;
+  }
+  .result.show{ display:block; }
+
+  .badges{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:linear-gradient(135deg, #3a2118, #2a1712);
+    border:1px solid var(--card-border);
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:0.8rem;
+    color:var(--text-mid);
+    font-weight:600;
+  }
+  .badge.relationship{ color:var(--ember-3); border-color:rgba(255,138,76,0.4); }
+
+  .prompt-box{
+    background:#1e130f;
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:20px;
+    font-size:1.05rem;
+    line-height:1.6;
+    color:var(--text-hi);
+    min-height:60px;
+  }
+  .prompt-box b{ color:var(--ember-3); }
+
+  .history{
+    margin-top:16px;
+  }
+  .history-title{
+    font-size:0.78rem;
+    color:var(--text-lo);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:8px;
+  }
+  .history-item{
+    font-size:0.85rem;
+    color:var(--text-mid);
+    padding:8px 10px;
+    border-left:2px solid var(--card-border);
+    margin-bottom:6px;
+    line-height:1.5;
+  }
+
+  footer{
+    max-width:760px;
+    margin:30px auto 0;
+    padding:0 16px;
+    text-align:center;
+    color:var(--text-lo);
+    font-size:0.78rem;
+    line-height:1.6;
+  }
+
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-thumb{ background:#4a2c20; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎲 Roleplay Prompt Randomizer</h1>
+  <p>Give it two characters, their clans, and how they know each other... and get a starting scene!</p>
+</header>
+
+<div class="wrap">
+
+  <!-- SETUP -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Characters</h2>
+    </div>
+    <div class="card-body">
+      <div class="char-pair">
+        <div class="char-block">
+          <div class="char-label">Character A</div>
+          <div class="field-row" style="margin-bottom:10px;">
+            <div class="field">
+              <label for="nameA">Name</label>
+              <input type="text" id="nameA" placeholder="e.g. Willowpaw">
+            </div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field">
+              <label for="affA">Affiliation</label>
+              <select id="affA">
+                <option value="FernClan">FernClan</option>
+                <option value="DriftClan">DriftClan</option>
+                <option value="AbyssClan">AbyssClan</option>
+                <option value="Unaffiliated">Unaffiliated</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="char-block">
+          <div class="char-label">Character B</div>
+          <div class="field-row" style="margin-bottom:10px;">
+            <div class="field">
+              <label for="nameB">Name</label>
+              <input type="text" id="nameB" placeholder="e.g. Ashclaw">
+            </div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field">
+              <label for="affB">Affiliation</label>
+              <select id="affB">
+                <option value="FernClan">FernClan</option>
+                <option value="DriftClan">DriftClan</option>
+                <option value="AbyssClan">AbyssClan</option>
+                <option value="Unaffiliated">Unaffiliated</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hint" style="margin-bottom:20px;">Leave names blank and they'll default to "Character A" / "Character B".</div>
+
+      <div class="char-block" style="margin-bottom:16px;">
+        <div class="char-label">Relationship</div>
+        <select id="relationship">
+          <option value="random">Random</option>
+          <option value="strangers">Strangers</option>
+          <option value="acquaintances">Acquaintances</option>
+          <option value="friends">Friends</option>
+          <option value="lovers">Lovers</option>
+          <option value="family">Family</option>
+          <option value="rivals">Rivals</option>
+          <option value="enemies">Enemies</option>
+          <option value="mentor">Mentor &amp; Apprentice</option>
+        </select>
+        <div class="hint" id="mentorHint" style="display:none; margin-top:10px; margin-bottom:0;">For Mentor &amp; Apprentice, Character A is treated as the mentor and Character B as the apprentice.</div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn wide" id="generateBtn">Generate Prompt</button>
+        <button type="button" class="btn secondary" id="surpriseBtn">Surprise Me (randomize everything)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="card result" id="resultCard">
+    <div class="card-head">
+      <h2>Your Prompt</h2>
+    </div>
+    <div class="card-body">
+      <div class="badges" id="badges"></div>
+      <div class="prompt-box" id="promptBox"></div>
+      <div class="btn-row">
+        <button type="button" class="btn secondary" id="rerollBtn">Reroll (same settings)</button>
+      </div>
+
+      <div class="history" id="historyWrap" style="display:none;">
+        <div class="history-title">Previously rolled</div>
+        <div id="historyList"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Daybreak Tools :: created by V / Basilio
+</footer>
+
+<script>
+(function(){
+
+  const affMeta = {
+    FernClan:   { short:'Fern',   order:0 },
+    DriftClan:  { short:'Drift',  order:1 },
+    AbyssClan:  { short:'Abyss',  order:2 },
+    Unaffiliated:{ short:'Outsider', order:3 }
+  };
+
+  const relationshipLabels = {
+    strangers:'Strangers',
+    acquaintances:'Acquaintances',
+    friends:'Friends',
+    lovers:'Lovers',
+    family:'Family',
+    rivals:'Rivals',
+    enemies:'Enemies',
+    mentor:'Mentor & Apprentice'
+  };
+  const relationshipKeys = Object.keys(relationshipLabels);
+
+  // ---- context (setting) phrase pools ----
+  function sameClanCtx(clan){
+    return [
+      'back at the ' + clan + ' camp',
+      'while out on a ' + clan + ' patrol',
+      'while hanging out near the fresh-kill pile',
+      'tucked away in a hidden corner of camp',
+      'while the clan is sharing tongues after a long day'
+    ];
+  }
+  function fernDriftCtx(){
+    return [
+      'out at the border meadow',
+      'along the southern shore of Fern Lake'
+    ];
+  }
+  function fernAbyssCtx(){
+    return [
+      'in the oak woods between the cliff and the Abyss river',
+      'along the cliff edge, hot springs steaming below',
+      'along the Abyss river'
+    ];
+  }
+  function driftAbyssCtx(){
+    return [
+      'out on the open prairie between the two territories',
+      'crossing paths in the tall prairie grass',
+      'at the edge of the prairie where the grass thins out'
+    ];
+  }
+  function clanOutsiderCtx(clan){
+    return [
+      'at the edge of ' + clan + '\'s territory'
+    ];
+  }
+  function outsiderOutsiderCtx(){
+    return [
+      'out in the unclaimed lands far from any clan',
+      'at a fallen tree which {A} discovers first, judging how nice of a den it would make'
+    ];
+  }
+
+  function getContext(affA, affB){
+    if(affA === 'Unaffiliated' && affB === 'Unaffiliated') return outsiderOutsiderCtx();
+    if(affA === 'Unaffiliated') return clanOutsiderCtx(affB);
+    if(affB === 'Unaffiliated') return clanOutsiderCtx(affA);
+    if(affA === affB) return sameClanCtx(affA);
+    const pair = [affA, affB].sort().join('-');
+    if(pair === 'DriftClan-FernClan') return fernDriftCtx();
+    if(pair === 'AbyssClan-FernClan') return fernAbyssCtx();
+    if(pair === 'AbyssClan-DriftClan') return driftAbyssCtx();
+  }
+
+  // ---- relationship prompt templates ----
+  const templates = {
+    strangers: [
+      '{A} and {B} cross paths {ctx} for the first time.',
+      '{A} spots {B} {ctx} while they were trying to have some alone time. They lock eyes before {A} and escape.',
+      '{B} is injured, and {A} finds them {ctx}.'
+    ],
+    acquaintances: [
+      '{A} and {B} run into one another {ctx}, {B} remembers something {A} told them when they first met and brings it up.',
+      '{A} needs a favor only {B} can help with, and tracks them down {ctx}.',
+      '{A} and {B} trade news and gossip {ctx}.',
+      'It\'s been a while since {A} and {B} last spoke. A run-in {ctx} changes that.',
+      '{A} catches {B} in a small lie {ctx}.'
+    ],
+    friends: [
+      '{A} and {B} meet up {ctx} just to catch up. {A} heard a rumor {B} has a crush on someone... they have to figure out who! (could be a false rumor!)',
+      '{A} is having a rough day and seeks out {B} {ctx} for comfort.',
+      '{A} and {B} get into some harmless mischief together {ctx}.',
+      '{B} confides a secret in {A} {ctx}.',
+      '{A} and {B} train together {ctx}.'
+    ],
+    lovers: [
+      '{A} and {B} steal a moment together {ctx}.',
+      '{A} has something awkward to confess to {B} {ctx}.',
+      '{A} and {B} argue {ctx} after one of them was being reckless during a patrol.',
+      '{A} and {B} sit {ctx}, and they talk about when each realized they had feelings for the other.',
+      '{A} has been watching {B} get close to another cat, for some reason it reminds {A} of when they and {B} were just friends, they seek {B} out {ctx} to talk to them about how it is making them feel.'
+    ],
+    family: [
+      '{A} and {B} reminisce about their kin, sitting {ctx}.',
+      '{B} comes to {A} for advice {ctx}.'
+    ],
+    rivals: [
+      '{A} and {B} compete over something petty {ctx}.',
+      '{A} refuses to let {B} outdo them {ctx}.',
+      '{A} and {B} are forced to work together {ctx}.',
+      '{B} one-ups {A} {ctx}.'
+    ],
+    enemies: [
+      '{A} catches {B} breaking the rules {ctx}.',
+      'Write the threats exchanged between {A} and {B} {ctx}.',
+      '{B} corners {A} {ctx}, and there\'s nowhere to run.'
+    ],
+    mentor: [
+      '{A} takes {B} out {ctx} to teach them something new.',
+      '{B} messes up during a lesson {ctx}.',
+      '{B} pushes back against {A}\'s teaching {ctx}.',
+      '{A} tells {B} a story from their own training days {ctx}.'
+    ]
+  };
+
+  const nameA = document.getElementById('nameA');
+  const nameB = document.getElementById('nameB');
+  const affA = document.getElementById('affA');
+  const affB = document.getElementById('affB');
+  const relationshipSel = document.getElementById('relationship');
+  const mentorHint = document.getElementById('mentorHint');
+
+  const resultCard = document.getElementById('resultCard');
+  const badges = document.getElementById('badges');
+  const promptBox = document.getElementById('promptBox');
+  const historyWrap = document.getElementById('historyWrap');
+  const historyList = document.getElementById('historyList');
+
+  let lastSettings = null;
+  let history = [];
+
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function affLabel(code){
+    return affMeta[code].short;
+  }
+
+  function categoryLabel(a, b){
+    const order = [a, b].slice().sort(function(x, y){ return affMeta[x].order - affMeta[y].order; });
+    return affLabel(order[0]) + ' / ' + affLabel(order[1]);
+  }
+
+  function resolveRelationship(key){
+    if(key === 'random'){
+      return pick(relationshipKeys);
+    }
+    return key;
+  }
+
+  function buildPrompt(settings){
+    const n1raw = settings.nameA.trim() || 'Character A';
+    const n2raw = settings.nameB.trim() || 'Character B';
+    const relKey = resolveRelationship(settings.relationship);
+    const ctxPool = getContext(settings.affA, settings.affB);
+    const ctx = pick(ctxPool);
+    const tpl = pick(templates[relKey]);
+
+    // For symmetric relationships, randomly swap which name fills {A}/{B} for variety.
+    // Mentor & Apprentice stays fixed: A = mentor, B = apprentice.
+    let n1 = n1raw, n2 = n2raw;
+    if(relKey !== 'mentor' && Math.random() < 0.5){
+      n1 = n2raw; n2 = n1raw;
+    }
+
+    const text = tpl
+      .split('{A}').join(n1)
+      .split('{B}').join(n2)
+      .split('{ctx}').join(ctx);
+
+    return {
+      text: text,
+      relKey: relKey,
+      catLabel: categoryLabel(settings.affA, settings.affB),
+      relLabel: relationshipLabels[relKey]
+    };
+  }
+
+  function render(result){
+    badges.innerHTML =
+      '<span class="badge">' + result.catLabel + '</span>' +
+      '<span class="badge relationship">' + result.relLabel + '</span>';
+    promptBox.textContent = result.text;
+    resultCard.classList.add('show');
+
+    history.unshift(result.text);
+    if(history.length > 5) history = history.slice(0, 5);
+    if(history.length > 1){
+      historyWrap.style.display = 'block';
+      historyList.innerHTML = history.slice(1).map(function(h){
+        return '<div class="history-item">' + h + '</div>';
+      }).join('');
+    } else {
+      historyWrap.style.display = 'none';
+    }
+  }
+
+  function generate(){
+    lastSettings = {
+      nameA: nameA.value,
+      nameB: nameB.value,
+      affA: affA.value,
+      affB: affB.value,
+      relationship: relationshipSel.value
+    };
+    render(buildPrompt(lastSettings));
+  }
+
+  function reroll(){
+    if(!lastSettings){ generate(); return; }
+    render(buildPrompt(lastSettings));
+  }
+
+  function surprise(){
+    const affCodes = Object.keys(affMeta);
+    affA.value = pick(affCodes);
+    affB.value = pick(affCodes);
+    relationshipSel.value = pick(relationshipKeys.concat(['random']));
+    mentorHint.style.display = relationshipSel.value === 'mentor' ? 'block' : 'none';
+    generate();
+  }
+
+  relationshipSel.addEventListener('change', function(){
+    mentorHint.style.display = relationshipSel.value === 'mentor' ? 'block' : 'none';
+  });
+
+  document.getElementById('generateBtn').addEventListener('click', generate);
+  document.getElementById('rerollBtn').addEventListener('click', reroll);
+  document.getElementById('surpriseBtn').addEventListener('click', surprise);
+
+})();
+</script>
+
+</body>
+</html>
